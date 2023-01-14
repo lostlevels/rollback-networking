@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <title>Multiplayer</title>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.0/phaser.min.js'></script>
+  <script src='/build.js'></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    #link-container {
+      position: fixed;
+      font: 20px Arial, sans-serif;
+      width: 256px;
+      z-index: 10;
+      padding: 16px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+    }
+
+    #link {
+      width: 100%;
+    }
+
+    .hidden {
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id='link-container' class='hidden'>
+    <p>Have someone join your game with this link.</p>
+    <input id='link' type='text' placeholder='url here' value='what'/>
+    <p id='notice' class='hidden'>Text copied to clipboard.</p>
+  </div>
+
+  <script>
+    const linkContainer = document.getElementById('link-container');
+    const linkInput = document.getElementById('link');
+    const notice = document.getElementById('notice');
+
+    linkInput.addEventListener('click', (e) => {
+      if (e.currentTarget.value.startsWith('http')) {
+        navigator.clipboard.writeText(e.currentTarget.value).then(() => {
+          notice.classList.remove('hidden');
+        });
+      }
+    });
+
+    let scene = null;
+    const isHost = !!!window.location.search;
+    if (isHost) {
+      scene = new GameScene({
+        onHosted: (id) => {
+          linkContainer.classList.remove('hidden');
+          linkInput.value = `${window.location.href}?${id}`;
+        },
+        onGameStarted: () => {
+          linkContainer.classList.add('hidden');
+        },
+      });
+    }
+    else {
+      const hostId = window.location.search.slice(1);
+      if (!hostId) {
+        throw Error('No peer id found in query string to connect to.');
+      }
+      scene = new GameScene({
+        remoteHostId: hostId,
+      });
+    }
+
+    const config = {
+      type: Phaser.AUTO,
+      width: SCREEN_WIDTH,
+      height: SCREEN_HEIGHT,
+      scene: [scene],
+      backgroundColor: '#ffffff',
+    };
+    const game = new Phaser.Game(config);
+  </script>
+</body>
+</html>
