@@ -94,19 +94,19 @@ class GameScene extends Phaser.Scene {
     this.scrollingSkyFurther = this.add.tileSprite(0, 0, SCREEN_WIDTH, 220, 'sky-scroll-further').setOrigin(0, 0);
     this.scrollingSkyCloser = this.add.tileSprite(0, 0, SCREEN_WIDTH, 220, 'sky-scroll-closer').setOrigin(0, 0);
 
-    this.player = this.add.sprite(400, 300, 'player').setOrigin(0, 0);
-    this.playerMirror = this.add.sprite(-400, 0, 'player').setOrigin(0, 0);
-    this.remote = this.add.sprite(400, 300, 'player-remote').setOrigin(0, 0);
-    this.remoteMirror = this.add.sprite(-400, 300, 'player-remote').setOrigin(0, 0);
+    this.player = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player').setOrigin(0, 0);
+    this.playerMirror = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player').setOrigin(0, 0);
+    this.remote = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player-remote').setOrigin(0, 0);
+    this.remoteMirror = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player-remote').setOrigin(0, 0);
 
     // arbritrary limit on number of visible blocks and enemies.
     const maxVisibleBlocks = 64;
     for (let i = 0; i < maxVisibleBlocks; i++) {
-      this.blocks.push(this.add.image(-512, 0, 'block').setOrigin(0, 0));
+      this.blocks.push(this.add.image(SCREEN_WIDTH, SCREEN_HEIGHT, 'block').setOrigin(0, 0));
     }
     const maxVisibleEnemies = 64;
     for (let i = 0; i < maxVisibleEnemies; i++) {
-      this.enemies.push(this.add.sprite(-512, 0, 'enemy').setOrigin(0, 0));
+      this.enemies.push(this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'enemy').setOrigin(0, 0));
     }
 
     this.add.image(0, 0, 'fg-top').setOrigin(0, 0);
