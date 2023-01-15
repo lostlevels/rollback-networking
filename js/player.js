@@ -3,7 +3,7 @@ const PLAYER_STATE_IDLE           = 0;
 const PLAYER_STATE_RUNNING        = 1;
 const PLAYER_STATE_HURT           = 2;
 const PLAYER_HURT_DURATION_FRAMES = 60;
-const PLAYER_SPEED                = toFixed(350);
+const PLAYER_SPEED                = toFixed(300);
 const PLAYER_WIDTH                = 64;
 const PLAYER_HEIGHT               = 64;
 
@@ -25,10 +25,13 @@ class Player {
   // input may be null if input hasn't arrived yet from remote player.
   update(dt, input, state) {
     this.updateHorizontal(dt, input, state);
-    const canJump = this.updateVertical(dt, input, state);
+    const {canJump, createdObjects} = this.updateVertical(dt, input, state);
     this.checkEnemyCollisions(state.enemies, input);
+    this.checkProjectileCollisions(state.projectiles, input);
+    this.checkPickupCollisions(state.pickups);
     this.updateJump(input, canJump);
     this.updateState(input);
+    return createdObjects;
   }
 
   updateState(input) {
@@ -51,6 +54,7 @@ class Player {
       for (let block of state.blocks) {
         if (collision(this, block)) {
           setToRight(this, block);
+          break;
         }
       }
       this.state = PLAYER_STATE_RUNNING;
@@ -61,6 +65,7 @@ class Player {
       for (let block of state.blocks) {
         if (collision(this, block)) {
           setToLeft(this, block);
+          break;
         }
       }
       this.state = PLAYER_STATE_RUNNING;
@@ -78,7 +83,30 @@ class Player {
         else if (!enemy.dying()) {
           this.hurt();
           this.score = Math.max(0, this.score - 1);
+          break;
         }
+      }
+    }
+  }
+
+  checkProjectileCollisions(projectiles, input) {
+    for (let projectile of projectiles) {
+      if (collision(this, projectile)) {
+        if (projectile.canHurt()) {
+          this.hurt();
+          this.score = Math.max(0, this.score - 1);
+        }
+        else if (input && (input.left || input.right)) { // run into projectile
+          projectile.activate(this.dir);
+        }
+      }
+    }
+  }
+
+  checkPickupCollisions(pickups) {
+    for (let pickup of pickups) {
+      if (collision(this, pickup) && pickup.kill()) {
+        this.score++;
       }
     }
   }
@@ -93,6 +121,7 @@ class Player {
     this.vy += mulFixed(GRAVITY, dt);
     this.y += mulFixed(this.vy, dt);
     let canJump = false;
+    let createdObjects = {};
     for (let block of state.blocks) {
       if (collision(this, block)) {
         if (this.vy >= 0 && above(this, block)) {
@@ -102,13 +131,16 @@ class Player {
         }
         else {
           setOnBottom(this, block);
-          block.hit();
+          createdObjects = block.hit(state.frame);
+          if (block.type == BLOCK_TYPE_QUESTION) {
+            this.score++;
+          }
           this.vy = 0;
         }
         break;
       }
     }
-    return canJump;
+    return {canJump, createdObjects};
   }
 
   hurt() {

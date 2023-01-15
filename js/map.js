@@ -4,7 +4,7 @@ function createInitialGameState({playerId, remoteId, frame=0}) {
   const GRID_SIZE = BLOCK_HEIGHT;
   const blocks = [
     // ground
-    new Block({x: toFixed(-1 * BLOCK_WIDTH), y: toFixed(SCREEN_HEIGHT - BLOCK_HEIGHT*2), width: SCREEN_WIDTH + BLOCK_HEIGHT * 2, height: 48*2, name: BLOCK_NAME_GROUND}),
+    new Block({x: toFixed(-1 * BLOCK_WIDTH), y: toFixed(SCREEN_HEIGHT - BLOCK_HEIGHT*2), width: SCREEN_WIDTH + BLOCK_WIDTH * 2, height: BLOCK_HEIGHT*2, name: BLOCK_NAME_GROUND}),
 
     new Block({x: toFixed(-1 * BLOCK_WIDTH), y: toFixed(2 * GRID_SIZE)}), // hidden block on edges to allow wrap around
     new Block({x: toFixed(0 * BLOCK_WIDTH), y: toFixed(2 * GRID_SIZE)}),
@@ -51,15 +51,14 @@ function createInitialGameState({playerId, remoteId, frame=0}) {
     new Block({x: toFixed(10 * BLOCK_WIDTH), y: toFixed(5 * GRID_SIZE)}),
   ];
 
-  const enemies = [];
-
-  const spawner = new Spawner();
   const objects = {
     player: new Player({id: playerId, x: toFixed(SCREEN_WIDTH/2), y: toFixed(128)}),
     remote: new Player({id: remoteId, x: toFixed(SCREEN_WIDTH/2), y: toFixed(128)}),
     blocks,
-    enemies,
-    spawner,
+    enemies: [],
+    spawner: new Spawner(),
+    pickups: [],
+    projectiles: [],
   };
 
   return new GameState(frame, objects);

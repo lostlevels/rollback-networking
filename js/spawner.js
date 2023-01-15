@@ -4,7 +4,7 @@ class Spawner {
   }
 
   update(dt, rand, frame) {
-    let createdEnemies = [];
+    const createdEnemies = [];
     // can make this configurable on current level, difficulty, score etc.
     if (frame >= 120 && frame % 300 == 0) {
       // Create enemy on left or right 50/50 chance
@@ -17,7 +17,7 @@ class Spawner {
         createdEnemies.push(new Enemy({x: toFixed(SCREEN_WIDTH-ENEMY_WIDTH), y: toFixed(80), dir: DIR_LEFT, speed: toFixed(70), alternate: alternateColor}));
       }
     }
-    return createdEnemies;
+    return {createdEnemies};
   }
 
   clone() {

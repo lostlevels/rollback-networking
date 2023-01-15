@@ -9,6 +9,8 @@ class GameScene extends Phaser.Scene {
     // sprites / views
     this.blocks = [];
     this.enemies = [];
+    this.pickups = [];
+    this.projectiles = [];
     this.player = null;
     this.playerMirror = null;
     this.remote = null;
@@ -78,12 +80,12 @@ class GameScene extends Phaser.Scene {
     this.load.image('sky-scroll-closer', 'assets/sky-scroll-closer.png');
     this.load.image('sky-scroll-furthest', 'assets/sky-scroll-furthest.png');
     this.load.image('fg-top', 'assets/fg-top.png');
-    this.load.image('fg-top', 'assets/fg-top.png');
     this.load.image('fg-bottom', 'assets/fg-bottom.png');
     this.load.image('bg-hills', 'assets/bg-hills.png');
-    this.load.image('block', 'assets/block.png');
+    this.load.image('pickup', 'assets/pickup.png');
+    this.load.image('projectile', 'assets/projectile.png');
+    this.load.spritesheet('block', 'assets/block.png', { frameWidth: BLOCK_WIDTH, frameHeight: BLOCK_HEIGHT });
     this.load.spritesheet('enemy', 'assets/enemy.png', { frameWidth: 80, frameHeight: 62 });
-    this.load.image('background', 'assets/background.png');
     this.load.spritesheet('player', 'assets/player.png', { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('player-remote', 'assets/player-remote.png', { frameWidth: 64, frameHeight: 64 });
   }
@@ -107,6 +109,14 @@ class GameScene extends Phaser.Scene {
     const maxVisibleEnemies = 64;
     for (let i = 0; i < maxVisibleEnemies; i++) {
       this.enemies.push(this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'enemy').setOrigin(0, 0));
+    }
+    const maxVisiblePickups = 64;
+    for (let i = 0; i < maxVisiblePickups; i++) {
+      this.pickups.push(this.add.image(SCREEN_WIDTH, SCREEN_HEIGHT, 'pickup').setOrigin(0, 0));
+    }
+    const maxVisibleProjectiles = 64;
+    for (let i = 0; i < maxVisibleProjectiles; i++) {
+      this.projectiles.push(this.add.image(SCREEN_WIDTH, SCREEN_HEIGHT, 'projectile').setOrigin(0, 0));
     }
 
     this.add.image(0, 0, 'fg-top').setOrigin(0, 0);
@@ -177,7 +187,20 @@ class GameScene extends Phaser.Scene {
     for (let i = 0; i < Math.min(state.blocks.length, this.blocks.length); i++) {
       this.blocks[i].x = fromFixed(state.blocks[i].x);
       this.blocks[i].y = fromFixed(state.blocks[i].y);
+      this.blocks[i].setFrame(state.blocks[i].type == BLOCK_TYPE_QUESTION ? 1 : 0);
     }
+
+    for (let i = 0; i < Math.min(state.pickups.length, this.pickups.length); i++) {
+      this.pickups[i].x = fromFixed(state.pickups[i].x);
+      this.pickups[i].y = fromFixed(state.pickups[i].y);
+    }
+    hideRest(this.pickups, Math.min(state.pickups.length, this.pickups.length));
+
+    for (let i = 0; i < Math.min(state.projectiles.length, this.projectiles.length); i++) {
+      this.projectiles[i].x = fromFixed(state.projectiles[i].x);
+      this.projectiles[i].y = fromFixed(state.projectiles[i].y);
+    }
+    hideRest(this.projectiles, Math.min(state.projectiles.length, this.projectiles.length));
 
     let enemyModels = state.enemies;
     for (let i = 0; i < Math.min(enemyModels.length, this.enemies.length); i++) {
@@ -185,10 +208,7 @@ class GameScene extends Phaser.Scene {
       const model = enemyModels[i];
       setSpriteFromEnemy(sprite, model);
     }
-    // hide the rest
-    for (let i = Math.min(enemyModels.length, this.enemies.length); i < this.enemies.length; i++) {
-      this.enemies[i].visible = false;
-    }
+    hideRest(this.enemies, Math.min(enemyModels.length, this.enemies.length));
   }
 
   updateScrollingClouds(dt) {
@@ -240,4 +260,11 @@ function setSpriteFromEnemy(sprite, enemy) {
   sprite.flipX = enemy.dir == DIR_LEFT;
   sprite.setFrame(frame);
   sprite.visible = true;
+}
+
+function hideRest(sprites, offset) {
+  for (let i = offset; i < sprites.length; i++) {
+    sprites[i].x = SCREEN_WIDTH;
+    sprites[i].y = SCREEN_HEIGHT;
+  }
 }

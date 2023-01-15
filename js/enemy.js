@@ -22,6 +22,7 @@ class Enemy {
     this.updateHorizontal(dt, state);
     const blockBelow = this.updateVertical(dt, state);
     this.updateState(dt, state, blockBelow);
+    this.checkProjectileCollisions(state.projectiles);
   }
 
   updateHorizontal(dt, state) {
@@ -46,12 +47,12 @@ class Enemy {
           blockBelow = block;
 
           if (block.state == BLOCK_STATE_FLIPPING && this.vy >= 0) {
-            this.state = this.state == ENEMY_STATE_HURT ? ENEMY_STATE_WALKING : ENEMY_STATE_HURT;
-            this.vy = -toFixed(300);
+            this.flip();
           }
           else {
             this.vy = 0;
           }
+          break;
         }
       }
     }
@@ -72,6 +73,22 @@ class Enemy {
     if (wrappedAround && blockBelow && blockBelow.name == BLOCK_NAME_GROUND) {
       this.state = ENEMY_STATE_DEAD;
     }
+  }
+
+  checkProjectileCollisions(projectiles) {
+    if (this.dying())
+      return;
+    for (let projectile of projectiles) {
+      if (projectile.canHurt() && collision(this, projectile)) {
+        this.kill(projectile.dir);
+        break;
+      }
+    }
+  }
+
+  flip() {
+    this.state = this.state == ENEMY_STATE_HURT ? ENEMY_STATE_WALKING : ENEMY_STATE_HURT;
+    this.vy = -toFixed(300);
   }
 
   dying() {

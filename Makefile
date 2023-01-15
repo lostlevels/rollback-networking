@@ -18,7 +18,7 @@ endif
 # These files need to be combined a specific order due to lexical scoping. For
 # simplicity I am avoiding using modules or task runners.
 concat:
-	@cat './js/connectionhandler.js' './js/mersennetwister.js' './js/fixed.js' './js/constants.js' './js/collision.js' './js/block.js' './js/enemy.js' './js/player.js' './js/spawner.js' './js/gamestate.js' './js/map.js' './js/world.js' './js/gamescene.js' > ./temp.js
+	@cat './js/connectionhandler.js' './js/mersennetwister.js' './js/fixed.js' './js/constants.js' './js/collision.js' './js/block.js' './js/projectile.js' './js/pickup.js' './js/enemy.js' './js/player.js' './js/spawner.js' './js/gamestate.js' './js/map.js' './js/world.js' './js/gamescene.js' > ./temp.js
 
 dest:
 	@mkdir -p ./build
