@@ -85,6 +85,10 @@ class Projectile {
     return this.state == PROJECTILE_STATE_DEAD;
   }
 
+  active() {
+    return this.state == PROJECTILE_STATE_MOVING;
+  }
+
   clone() {
     return new Projectile(this);
   }

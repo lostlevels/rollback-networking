@@ -51,6 +51,7 @@ class Block {
   hit(frame) {
     if (this.state != BLOCK_STATE_IDLE)
       return;
+
     this.state = BLOCK_STATE_FLIPPING;
     this.vy = -toFixed(200);
 
@@ -59,13 +60,13 @@ class Block {
       const rand = new MersenneTwister(frame);
       if (~~(rand.random() * 100) <= 50) {
         return {
-          projectiles: [new Projectile({x: this.x, y: this.y - toFixed(PROJECTILE_HEIGHT)})],
+          projectiles: [new Projectile({x: this.x + toFixed(this.width/2 - PROJECTILE_WIDTH/2), y: this.y - toFixed(PROJECTILE_HEIGHT)})],
         };
       }
       else {
         const pickupsToSpawn = 1 + ~~(rand.random() * 3);
         return {
-          pickups: [...Array(pickupsToSpawn).keys()].map(_ => createRandPickup(this.x, this.y - toFixed(PICKUP_HEIGHT), rand)),
+          pickups: [...Array(pickupsToSpawn).keys()].map(_ => createRandPickup(this.x + toFixed(this.width/2 - PICKUP_HEIGHT/2), this.y - toFixed(PICKUP_HEIGHT), rand)),
         };
       }
     }

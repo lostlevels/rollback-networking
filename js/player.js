@@ -8,7 +8,7 @@ const PLAYER_WIDTH                = 64;
 const PLAYER_HEIGHT               = 64;
 
 class Player {
-  constructor({id, x, y, vy=0, score=0, state=PLAYER_STATE_IDLE, dir=DIR_LEFT, hurtFramesLeft=0, speed=PLAYER_SPEED}) {
+  constructor({id, x, y, vy=0, score=0, state=PLAYER_STATE_IDLE, dir=DIR_LEFT, hurtFramesLeft=0, speed=PLAYER_SPEED, invincibilityFramesLeft=0}) {
     this.id = id;
     this.x = x;
     this.y = y;
@@ -20,6 +20,7 @@ class Player {
     this.dir = dir;
     this.score = score;
     this.hurtFramesLeft = hurtFramesLeft;
+    this.invincibilityFramesLeft = invincibilityFramesLeft;
   }
 
   // input may be null if input hasn't arrived yet from remote player.
@@ -38,7 +39,12 @@ class Player {
     if (this.hurtFramesLeft > 0) {
       if (--this.hurtFramesLeft <= 0) {
         this.state = PLAYER_STATE_IDLE;
+        // temp period of time where user doesn't take damage
+        this.invincibilityFramesLeft = 60;
       }
+    }
+    if (this.invincibilityFramesLeft > 0) {
+      this.invincibilityFramesLeft--;
     }
 
     wrapAroundScreen(this, SCREEN_WIDTH);
@@ -80,9 +86,8 @@ class Player {
           enemy.kill(this.dir);
           this.score++;
         }
-        else if (!enemy.dying()) {
+        else if (this.canHurt() && enemy.state == ENEMY_STATE_WALKING) {
           this.hurt();
-          this.score = Math.max(0, this.score - 1);
           break;
         }
       }
@@ -94,7 +99,6 @@ class Player {
       if (collision(this, projectile)) {
         if (projectile.canHurt()) {
           this.hurt();
-          this.score = Math.max(0, this.score - 1);
         }
         else if (input && (input.left || input.right)) { // run into projectile
           projectile.activate(this.dir);
@@ -144,15 +148,24 @@ class Player {
   }
 
   hurt() {
-    if (this.state != PLAYER_STATE_HURT) {
+    if (!this.invincible() && this.state != PLAYER_STATE_HURT) {
       this.state = PLAYER_STATE_HURT;
       this.hurtFramesLeft = PLAYER_HURT_DURATION_FRAMES;
       this.vy = -toFixed(200);
+      this.score = Math.max(0, this.score - 1);
     }
   }
 
   canMove() {
     return this.state != PLAYER_STATE_HURT;
+  }
+
+  canHurt() {
+    return !this.invincible();
+  }
+
+  invincible() {
+    return this.invincibilityFramesLeft > 0;
   }
 
   clone() {

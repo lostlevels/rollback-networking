@@ -52,8 +52,8 @@ function createInitialGameState({playerId, remoteId, frame=0}) {
   ];
 
   const objects = {
-    player: new Player({id: playerId, x: toFixed(SCREEN_WIDTH/2), y: toFixed(128)}),
-    remote: new Player({id: remoteId, x: toFixed(SCREEN_WIDTH/2), y: toFixed(128)}),
+    player: new Player({id: playerId, x: toFixed(SCREEN_WIDTH/2 - PLAYER_WIDTH/2), y: toFixed(128)}),
+    remote: new Player({id: remoteId, x: toFixed(SCREEN_WIDTH/2 - PLAYER_WIDTH/2), y: toFixed(128)}),
     blocks,
     enemies: [],
     spawner: new Spawner(),

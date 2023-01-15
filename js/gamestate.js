@@ -11,7 +11,9 @@ class GameState {
   }
 
   update(dt, playerInput, remoteInput) {
-    let rand = new MersenneTwister(this.frame);
+    // Use UTC Hour as part of the seed for some variation so that each
+    // playthrough isn't the exact same as far as enemies spawning etc.
+    let rand = new MersenneTwister(this.frame + new Date().getUTCHours());
 
     // Must be deterministic so the order of player doing an action must
     // be same for both players. This can be more "fair" by using a random or
@@ -62,7 +64,7 @@ class GameState {
     }
 
     // Randomly make a block a question block every so often
-    rand = new MersenneTwister(this.frame);
+    rand = new MersenneTwister(this.frame + new Date().getUTCHours());
     if (this.frame > 60 && (this.frame % 120) == 0 && ~~(rand.random() * 100) <= 50 && this.blocks.length) {
       this.blocks[~~(rand.random() * this.blocks.length)].changeToQuestionBlock();
     }

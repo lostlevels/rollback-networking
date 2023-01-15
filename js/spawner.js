@@ -11,10 +11,10 @@ class Spawner {
       const randomChance = ~~(rand.random() * 100);
       const alternateColor = (frame / 300) & 1 == 1;
       if (randomChance <= 50) {
-        createdEnemies.push(new Enemy({x: toFixed(0), y: toFixed(80), dir: DIR_RIGHT, speed: toFixed(70), alternate: alternateColor}));
+        createdEnemies.push(new Enemy({x: toFixed(0), y: toFixed(96 - ENEMY_HEIGHT - 1), dir: DIR_RIGHT, speed: toFixed(70), alternate: alternateColor}));
       }
       else {
-        createdEnemies.push(new Enemy({x: toFixed(SCREEN_WIDTH-ENEMY_WIDTH), y: toFixed(80), dir: DIR_LEFT, speed: toFixed(70), alternate: alternateColor}));
+        createdEnemies.push(new Enemy({x: toFixed(SCREEN_WIDTH-ENEMY_WIDTH), y: toFixed(96 - ENEMY_HEIGHT - 1), dir: DIR_LEFT, speed: toFixed(70), alternate: alternateColor}));
       }
     }
     return {createdEnemies};

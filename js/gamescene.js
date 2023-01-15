@@ -12,9 +12,7 @@ class GameScene extends Phaser.Scene {
     this.pickups = [];
     this.projectiles = [];
     this.player = null;
-    this.playerMirror = null;
     this.remote = null;
-    this.remoteMirror = null;
 
     // inputs
     this.leftInputs = [];
@@ -97,9 +95,12 @@ class GameScene extends Phaser.Scene {
     this.scrollingSkyCloser = this.add.tileSprite(0, 0, SCREEN_WIDTH, 220, 'sky-scroll-closer').setOrigin(0, 0);
 
     this.player = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player').setOrigin(0, 0);
-    this.playerMirror = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player').setOrigin(0, 0);
+    // mirror is another copy of the sprite to allow the sprite to partially
+    // show when it's at edge of the screen.
+    this.player.mirror = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player').setOrigin(0, 0);
     this.remote = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player-remote').setOrigin(0, 0);
-    this.remoteMirror = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player-remote').setOrigin(0, 0);
+    this.remote.mirror = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'player-remote').setOrigin(0, 0);
+
 
     // arbritrary limit on number of visible blocks and enemies.
     const maxVisibleBlocks = 64;
@@ -108,15 +109,19 @@ class GameScene extends Phaser.Scene {
     }
     const maxVisibleEnemies = 64;
     for (let i = 0; i < maxVisibleEnemies; i++) {
-      this.enemies.push(this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'enemy').setOrigin(0, 0));
+      const enemy = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'enemy').setOrigin(0, 0);
+      enemy.mirror = this.add.sprite(SCREEN_WIDTH, SCREEN_HEIGHT, 'enemy').setOrigin(0, 0);
+      this.enemies.push(enemy);
     }
     const maxVisiblePickups = 64;
     for (let i = 0; i < maxVisiblePickups; i++) {
-      this.pickups.push(this.add.image(SCREEN_WIDTH, SCREEN_HEIGHT, 'pickup').setOrigin(0, 0));
+      this.pickups.push(this.add.image(SCREEN_WIDTH, SCREEN_HEIGHT, 'pickup').setOrigin(.5, 0));
     }
     const maxVisibleProjectiles = 64;
     for (let i = 0; i < maxVisibleProjectiles; i++) {
-      this.projectiles.push(this.add.image(SCREEN_WIDTH, SCREEN_HEIGHT, 'projectile').setOrigin(0, 0));
+      const projectile = this.add.image(SCREEN_WIDTH, SCREEN_HEIGHT, 'projectile').setOrigin(0, 0);
+      projectile.mirror = this.add.image(SCREEN_WIDTH, SCREEN_HEIGHT, 'projectile').setOrigin(0, 0);
+      this.projectiles.push(projectile);
     }
 
     this.add.image(0, 0, 'fg-top').setOrigin(0, 0);
@@ -179,26 +184,24 @@ class GameScene extends Phaser.Scene {
   updateViews(dt) {
     const framesBack = 2; // Render in the past a bit for a smoother appearance.
     const state = this.world.state(framesBack);
-    setSpriteFromPlayer(this.player, this.playerMirror, state.player);
-    setSpriteFromPlayer(this.remote, this.remoteMirror, state.remote);
+    setSpriteFromPlayer(this.player, state.player);
+    setSpriteFromPlayer(this.remote, state.remote);
     this.playerText.setText(`Your score: ${state.player.score}`);
     this.remoteText.setText(`Remote score: ${state.remote.score}`);
 
     for (let i = 0; i < Math.min(state.blocks.length, this.blocks.length); i++) {
-      this.blocks[i].x = fromFixed(state.blocks[i].x);
-      this.blocks[i].y = fromFixed(state.blocks[i].y);
+      setPosition(this.blocks[i], state.blocks[i]);
       this.blocks[i].setFrame(state.blocks[i].type == BLOCK_TYPE_QUESTION ? 1 : 0);
     }
 
     for (let i = 0; i < Math.min(state.pickups.length, this.pickups.length); i++) {
-      this.pickups[i].x = fromFixed(state.pickups[i].x);
-      this.pickups[i].y = fromFixed(state.pickups[i].y);
+      setPosition(this.pickups[i], state.pickups[i]);
+      this.pickups[i].scaleX = Math.cos(Date.now()/500 * Math.PI);
     }
     hideRest(this.pickups, Math.min(state.pickups.length, this.pickups.length));
 
     for (let i = 0; i < Math.min(state.projectiles.length, this.projectiles.length); i++) {
-      this.projectiles[i].x = fromFixed(state.projectiles[i].x);
-      this.projectiles[i].y = fromFixed(state.projectiles[i].y);
+      setPosition(this.projectiles[i], state.projectiles[i]);
     }
     hideRest(this.projectiles, Math.min(state.projectiles.length, this.projectiles.length));
 
@@ -218,34 +221,22 @@ class GameScene extends Phaser.Scene {
   }
 }
 
-function setSpriteFromPlayer(sprite, spriteMirror, player) {
+function setSpriteFromPlayer(sprite, player) {
   const animations = {
     [PLAYER_STATE_RUNNING]: [0, 1],
     [PLAYER_STATE_IDLE]: [0],
     [PLAYER_STATE_HURT]: [3],
   };
-  sprite.x = fromFixed(player.x);
-  sprite.y = spriteMirror.y = fromFixed(player.y);
-  const hurtVisibleToggle = player.state == PLAYER_STATE_HURT ? (Date.now() % 200) > 100 : true;
-  sprite.visible = hurtVisibleToggle;
-  if (sprite.x < 0) {
-    spriteMirror.x = SCREEN_WIDTH + sprite.x;
-    spriteMirror.visible = hurtVisibleToggle;
-  }
-  else if (sprite.x > SCREEN_WIDTH - sprite.width) {
-    spriteMirror.x = sprite.x - SCREEN_WIDTH;
-    spriteMirror.visible = hurtVisibleToggle;
-  }
-  else {
-    spriteMirror.visible = false;
-  }
-  sprite.flipX = spriteMirror.flipX = player.dir == DIR_LEFT;
+  setPosition(sprite, player);
+  const hurtVisibleToggle = player.state == PLAYER_STATE_HURT || player.invincible() ? (Date.now() % 200) > 100 : true;
+  sprite.visible = sprite.mirror.visible = hurtVisibleToggle;
+  sprite.flipX = sprite.mirror.flipX = player.dir == DIR_LEFT;
   const anims = animations[player.state];
   const millisPerFrame = Math.ceil(1000/ANIMATION_FPS);
   const millisDuration = millisPerFrame * anims.length
   const frame = anims[ ~~((Date.now() % millisDuration) / millisPerFrame) % anims.length];
   sprite.setFrame(frame);
-  spriteMirror.setFrame(frame);
+  sprite.mirror.setFrame(frame);
 }
 
 function setSpriteFromEnemy(sprite, enemy) {
@@ -255,16 +246,36 @@ function setSpriteFromEnemy(sprite, enemy) {
   const millisPerFrame = Math.ceil(1000/ANIMATION_FPS);
   const millisDuration = millisPerFrame * anims.length
   const frame = anims[ ~~((Date.now() % millisDuration) / millisPerFrame) % anims.length];
-  sprite.x = fromFixed(enemy.x);
-  sprite.y = fromFixed(enemy.y);
+  setPosition(sprite, enemy);
   sprite.flipX = enemy.dir == DIR_LEFT;
   sprite.setFrame(frame);
-  sprite.visible = true;
+  if (sprite.mirror) {
+    sprite.mirror.flipX = enemy.dir == DIR_LEFT;
+    sprite.mirror.setFrame(frame);
+  }
 }
+
 
 function hideRest(sprites, offset) {
   for (let i = offset; i < sprites.length; i++) {
     sprites[i].x = SCREEN_WIDTH;
     sprites[i].y = SCREEN_HEIGHT;
+  }
+}
+
+function setPosition(sprite, model) {
+  sprite.x = fromFixed(model.x) + sprite.originX * model.width;
+  sprite.y = fromFixed(model.y) + sprite.originY * model.height;
+  if (sprite.mirror) {
+    sprite.mirror.y = sprite.y;
+    if (sprite.x < 0) {
+      sprite.mirror.x = SCREEN_WIDTH + sprite.x;
+    }
+    else if (sprite.x > SCREEN_WIDTH - sprite.width) {
+      sprite.mirror.x = sprite.x - SCREEN_WIDTH;
+    }
+    else {
+      sprite.mirror.x = SCREEN_WIDTH;
+    }
   }
 }

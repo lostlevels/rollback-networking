@@ -79,7 +79,7 @@ class Enemy {
     if (this.dying())
       return;
     for (let projectile of projectiles) {
-      if (projectile.canHurt() && collision(this, projectile)) {
+      if (projectile.active() && collision(this, projectile)) {
         this.kill(projectile.dir);
         break;
       }
