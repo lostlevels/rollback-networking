@@ -24,8 +24,8 @@ class Player {
 
   // input may be null if input hasn't arrived yet from remote player.
   update(dt, input, state) {
-    this.updateHorizontalMovement(dt, input, state);
-    const canJump = this.updateVerticalMovement(dt, input, state);
+    this.updateHorizontal(dt, input, state);
+    const canJump = this.updateVertical(dt, input, state);
     this.checkEnemyCollisions(state.enemies, input);
     this.updateJump(input, canJump);
     this.updateState(input);
@@ -45,7 +45,7 @@ class Player {
     }
   }
 
-  updateHorizontalMovement(dt, input, state) {
+  updateHorizontal(dt, input, state) {
     if (input && input.left && this.canMove()) {
       this.x -= mulFixed(this.speed, dt);
       for (let block of state.blocks) {
@@ -89,7 +89,7 @@ class Player {
     }
   }
 
-  updateVerticalMovement(dt, input, state) {
+  updateVertical(dt, input, state) {
     this.vy += mulFixed(GRAVITY, dt);
     this.y += mulFixed(this.vy, dt);
     let canJump = false;

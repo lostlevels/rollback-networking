@@ -117,12 +117,14 @@ class GameScene extends Phaser.Scene {
     this.actionInputs = [this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE), this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)];
 
     const playerStyle = { font: 'bold 16pt Trebuchet MS', fill: 'white', align: 'left' };
-    this.playerText = this.add.text(4, SCREEN_HEIGHT-4, 'Score: 0', playerStyle).setOrigin(0, 1);
+    this.playerText = this.add.text(4, SCREEN_HEIGHT-4, '', playerStyle).setOrigin(0, 1);
     const remoteStyle = { font: 'bold 16pt Trebuchet MS', fill: 'white', align: 'right' };
-    this.remoteText = this.add.text(SCREEN_WIDTH-4, SCREEN_HEIGHT-4, 'Score: 0', remoteStyle).setOrigin(1, 1);
+    this.remoteText = this.add.text(SCREEN_WIDTH-4, SCREEN_HEIGHT-4, '', remoteStyle).setOrigin(1, 1);
   }
 
   update(timestep, dt) {
+    this.updateScrollingClouds(dt); // just for effect.
+
     if (!this.world)
       return;
 
@@ -187,7 +189,9 @@ class GameScene extends Phaser.Scene {
     for (let i = Math.min(enemyModels.length, this.enemies.length); i < this.enemies.length; i++) {
       this.enemies[i].visible = false;
     }
+  }
 
+  updateScrollingClouds(dt) {
     this.scrollingSkyCloser.tilePositionX -= dt/1000 * 100;
     this.scrollingSkyFurther.tilePositionX -= dt/1000 * 50;
     this.scrollingSkyFurthest.tilePositionX -= dt/1000 * 25;

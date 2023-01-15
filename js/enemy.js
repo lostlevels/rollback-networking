@@ -19,12 +19,12 @@ class Enemy {
   }
 
   update(dt, state) {
-    this.updateHorizontalMovement(dt, state);
-    const blockBelow = this.updateVerticalMovement(dt, state);
+    this.updateHorizontal(dt, state);
+    const blockBelow = this.updateVertical(dt, state);
     this.updateState(dt, state, blockBelow);
   }
 
-  updateHorizontalMovement(dt, state) {
+  updateHorizontal(dt, state) {
     if (this.shouldMoveHorizontally()) {
       if (this.dir == DIR_LEFT) {
         this.x -= mulFixed(this.speed, dt);
@@ -35,7 +35,7 @@ class Enemy {
     }
   }
 
-  updateVerticalMovement(dt, state) {
+  updateVertical(dt, state) {
     this.vy += mulFixed(GRAVITY, dt);
     this.y += mulFixed(this.vy, dt);
     let blockBelow = null;
