@@ -5,8 +5,12 @@ class Spawner {
 
   update(dt, rand, frame) {
     const createdEnemies = [];
-    // can make this configurable on current level, difficulty, score etc.
-    if (frame >= 120 && frame % 300 == 0) {
+
+    // How many seconds does the rate of enemy spawning speed up
+    const speedUpAfterSeconds = 60;
+    const minFramesBetweenEnemies = 120; // No faster enemy spawn than this.
+    const intervalBetweenEnemies = Math.max(minFramesBetweenEnemies, 300 - ~~(frame / (SIMULATION_FRAME_RATE * speedUpAfterSeconds)) * 60);
+    if (frame >= 90 && (frame % intervalBetweenEnemies) == 0) {
       // Create enemy on left or right 50/50 chance
       const randomChance = ~~(rand.random() * 100);
       const alternateColor = (frame / 300) & 1 == 1;

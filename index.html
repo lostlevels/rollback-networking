@@ -53,6 +53,7 @@
 
     linkInput.addEventListener('click', (e) => {
       if (e.currentTarget.value.startsWith('http')) {
+        e.currentTarget.select();
         navigator.clipboard.writeText(e.currentTarget.value).then(() => {
           notice.classList.remove('hidden');
         });

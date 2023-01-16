@@ -182,7 +182,7 @@ class GameScene extends Phaser.Scene {
   }
 
   updateViews(dt) {
-    const framesBack = 2; // Render in the past a bit for a smoother appearance.
+    const framesBack = 5; // Render in the past a bit for a smoother appearance.
     const state = this.world.state(framesBack);
     setSpriteFromPlayer(this.player, state.player);
     setSpriteFromPlayer(this.remote, state.remote);
