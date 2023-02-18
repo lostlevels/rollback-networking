@@ -28,5 +28,5 @@ From the repository root run
 $ make all
 ```
 
-This should create a `build` folder with all the markup and resources needed. Serve that folder with your tool of choice.
+This should create a `build` folder with all the markup and resources needed. Serve that folder with your host/server of choice.
 

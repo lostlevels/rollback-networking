@@ -182,10 +182,12 @@ class GameScene extends Phaser.Scene {
   }
 
   updateViews(dt) {
-    const framesBack = 5; // Render in the past a bit for a smoother appearance.
-    const state = this.world.state(framesBack);
+    const remoteFramesBack = 8; // Render in the past a bit for a smoother appearance.
+    const localFramesBack = 2;
+    const state = this.world.state(localFramesBack);
+    const remoteState = this.world.state(remoteFramesBack);
     setSpriteFromPlayer(this.player, state.player);
-    setSpriteFromPlayer(this.remote, state.remote);
+    setSpriteFromPlayer(this.remote, remoteState.remote);
     this.playerText.setText(`Your score: ${state.player.score}`);
     this.remoteText.setText(`Remote score: ${state.remote.score}`);
 
@@ -254,7 +256,6 @@ function setSpriteFromEnemy(sprite, enemy) {
     sprite.mirror.setFrame(frame);
   }
 }
-
 
 function hideRest(sprites, offset) {
   for (let i = offset; i < sprites.length; i++) {
